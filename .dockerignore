@@ -1,0 +1,24 @@
+# Node modules
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Build output
+dist
+.vite
+
+# Configs y cachés locales
+.idea
+.vscode
+*.swp
+.DS_Store
+
+# Variables de entorno (para que no se incluyan en la imagen)
+.env
+.env.*.local
+
+# Docker
+Dockerfile
+docker-compose*.yml
+
