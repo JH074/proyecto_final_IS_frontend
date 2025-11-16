@@ -61,6 +61,32 @@ function Reservacion() {
     let totalReal = 0;
     let horaSalida = "";
 
+    // Cuando cambia la zona, limpia lugar, tipo de cancha y cancha
+    useEffect(() => {
+        setLugar("");
+        setTipoCancha("");
+        setCancha("");
+        setCanchaSeleccionada(null);
+        setLugaresDisponibles([]);
+        setTiposCanchasDisponibles([]);
+        setCanchasDisponibles([]);
+    }, [zona]);
+
+    // Cuando cambia el lugar, limpia tipo de cancha y cancha
+    useEffect(() => {
+        setTipoCancha("");
+        setCancha("");
+        setCanchaSeleccionada(null);
+        setTiposCanchasDisponibles([]);
+        setCanchasDisponibles([]);
+    }, [lugar]);
+
+    // Cuando cambia el tipo de cancha, limpia solo la cancha
+    useEffect(() => {
+        setCancha("");
+        setCanchaSeleccionada(null);
+    }, [tipoCancha]);
+
     if (selectedHours.length > 0) {
         // 1) Hora de inicio
         hInicio = parseInt(selectedHours[0].split(':')[0], 10);
@@ -228,8 +254,8 @@ function Reservacion() {
         return (
             <div className="flex items-center gap-2 mt-2">
                 <div className="text-3xl text-white flex">
-                    {Array(filledStars).fill("⭐")}
-                    {halfStar && "⭐"}
+                    {Array(filledStars).fill("★")}
+                    {halfStar && "★"}
                     {Array(emptyStars).fill("☆")}
                 </div>
 
@@ -247,7 +273,7 @@ function Reservacion() {
                         key={value}
                         onClick={() => setUserRating(value)}
                         className="cursor-pointer text-4xl transition"
-                        style={{ color: value <= userRating ? "#FFD700" : "#777" }}
+                        style={{ color: value <= userRating ? "#FFF" : "#777" }}
                     >
                         ★
                     </span>
@@ -462,35 +488,37 @@ function Reservacion() {
                         </div>
                         <div className="m-6 flex flex-col items-center justify-center">
 
-                            {/* ⭐ Mostrar SOLO si hay cancha seleccionada */}
+                            {/* Mostrar SOLO si hay cancha seleccionada */}
                             {canchaSeleccionada && canchaSeleccionada.value && (
                                 <>
-
-                                    {/* ⭐ Promedio */}
-                                    <div className="text-yellow-400 text-2xl mb-2">
-                                        {renderStars(rating)}
+                                    <div className="w-full">
+                                        {/* Promedio */}
+                                        <div className="text-yellow-400 text-2xl mb-2">
+                                            {renderStars(rating)}
+                                        </div>
                                     </div>
-
-                                    {/* ⭐ Imagen */}
                                     {canchaSeleccionada.imagen && (
                                         <img
                                             src={canchaSeleccionada.imagen}
                                             alt={`Foto de cancha ${canchaSeleccionada.label}`}
-                                            className="w-full h-full object-cover rounded-lg shadow-lg mt-2"
+                                            className="w-full h-full object-cover rounded-lg shadow-lg mb-4"
                                         />
                                     )}
 
-                                    {/* ⭐ Calificación del usuario */}
-                                    <h3 className="text-white text-xl mt-4">Calificar esta cancha</h3>
+                                    <div className="w-full">
 
-                                    {renderRatingInput()}
+                                        {/* Calificación del usuario */}
+                                        <h3 className="text-white text-xl mt-1">Calificar esta cancha</h3>
 
-                                    <button
-                                        onClick={enviarCalificacion}
-                                        className="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-                                    >
-                                        Enviar calificación
-                                    </button>
+                                        {renderRatingInput()}
+
+                                        <button
+                                            onClick={enviarCalificacion}
+                                            className="mt-1 bg-white-300 text-white px-4 py-2 rounded-lg hover:bg-blue-300 hover:text-black transition"
+                                        >
+                                            Enviar calificación
+                                        </button>
+                                    </div>
                                 </>
                             )}
                         </div>
