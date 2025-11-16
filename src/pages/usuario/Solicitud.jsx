@@ -127,8 +127,10 @@ function Solicitud() {
                     nombreLugar: form.nombreLugar,
                     direccionLugar: form.direccionLugar,
                     nit: nitEstablecimiento,
-                    telefonoLugar
+                    telefonoLugar,
+                    idZona: form.zonaId,
                 })
+
 
             });
 
@@ -144,6 +146,24 @@ function Solicitud() {
 
             setSuccess(true);
             setErrorMsg(null);
+
+            setForm({
+                nombreCompleto: "",
+                correo: "",
+                telefono: "",
+                dui: "",
+                direccionUsuario: "",
+                nombreLugar: "",
+                numeroLugar: "",
+                nitLugar: "",
+                direccionLugar: "",
+                zonaId: ""
+            });
+            setTelefono("");
+            setDui("");
+            setTelefonoLugar("");
+            setNitEstablecimiento("");
+
         } catch (error) {
             console.error(error);
             setErrorMsg("Hubo un error al enviar la solicitud");
@@ -166,7 +186,7 @@ function Solicitud() {
     return (
         <div className="m-12 bg-[#E4EFFD] min-h-screen flex justify-center">
             <div className="w-full bg-white rounded-xl p-6 space-y-6">
-                <h1 className="text-2xl font-semibold text-[#213A58]">
+                <h1 className="justify-center flex text-2xl font-semibold text-[#213A58]">
                     Solicitud para ser propietario
                 </h1>
 
@@ -185,7 +205,7 @@ function Solicitud() {
                 </ol>
 
                 {/* DATOS PERSONALES */}
-                <p className="text-xl font-semibold text-[#213A58] mt-6">Datos personales *</p>
+                <p className="font-semibold text-[#213A58] mt-6">Datos personales *</p>
                 <div className="space-y-4">
                     {/* Nombre completo */}
                     <div>
@@ -252,7 +272,7 @@ function Solicitud() {
                 </div>
 
 
-                <p className="text-xl font-semibold text-[#213A58] mt-6">Datos del lugar *</p>
+                <p className="font-semibold text-[#213A58] mt-6">Datos del lugar *</p>
 
                 {/* DATOS DEL LUGAR */}
                 <div className="space-y-4">
@@ -275,7 +295,7 @@ function Solicitud() {
                                 value={telefonoLugar}
                                 onChange={(e) => setTelefonoLugar(formatTelefono(e.target.value))}
                                 maxLength={9}
-                                className="input input-bordered bg-white border-gray-300"
+                                className="input input-bordered  w-full bg-white border-gray-300"
                             />
 
                         </div>
@@ -287,7 +307,7 @@ function Solicitud() {
                                 value={nitEstablecimiento}
                                 onChange={(e) => setNitEstablecimiento(formatNIT(e.target.value))}
                                 maxLength={17}
-                                className="input input-bordered bg-white border-gray-300"
+                                className="input input-bordered  w-full bg-white border-gray-300"
                             />
 
                         </div>
@@ -296,7 +316,7 @@ function Solicitud() {
                             <input
                                 name="direccionLugar"
                                 type="text"
-                                className="input input-bordered bg-white border-gray-300 col-span-2"
+                                className="input input-bordered  w-full bg-white border-gray-300 col-span-2"
 
                                 value={form.direccionLugar}
                                 onChange={handleChange}
@@ -306,7 +326,7 @@ function Solicitud() {
                             <label className="block mb-1 font-medium">Zona</label>
                             <select
                                 name="zonaId"
-                                className="select select-bordered bg-white border-gray-300"
+                                className="select select-bordered  w-full bg-white border-gray-300"
                                 value={form.zonaId}
                                 onChange={handleChange}
                             >
