@@ -16,6 +16,7 @@ import Registro from "./pages/Registro";
 import InicioSesion from "./pages/InicioSesion";
 import MisReservaciones from "./pages/usuario/MisReservaciones";
 import Reservacion from "./pages/usuario/Reservacion";
+import Solicitud from "./pages/usuario/Solicitud";
 
 // Admin
 import AllReservaciones from "./pages/admin/AllReservaciones";
@@ -42,6 +43,7 @@ function App() {
             <Route path="/info_canchas" element={<InfoCanchitas />} />
             <Route path="/reservar" element={<Reservacion />} />
             <Route path="/mis_reservaciones" element={<MisReservaciones />} />
+            <Route path="/solicitudes" element={<Solicitud />} />
           </Route>
 
           {/* Rutas protegidas para ADMIN */}
