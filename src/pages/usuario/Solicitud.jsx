@@ -134,14 +134,10 @@ function Solicitud() {
 
             });
 
-            /*if (!response.ok) {
-                throw new Error("Error al enviar la solicitud");
-            }*/
             if (!response.ok) {
-                const errorText = await response.text();
-                console.log("Respuesta del backend:", errorText);
                 throw new Error("Error al enviar la solicitud");
             }
+
 
 
             setSuccess(true);
