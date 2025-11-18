@@ -42,6 +42,14 @@ function NavBar() {
               </>
             )}
 
+            {token && role === 'PROPIETARIO' && (
+            <>
+            <li><Link to="/reservaciones">Reservaciones</Link></li>
+            <li><Link to="/lugares">Lugares</Link></li>
+            </>
+            )}
+
+
             {token && role === 'ADMIN' && (
               <>
                 <li><Link to="/reservaciones">Reservaciones</Link></li>
