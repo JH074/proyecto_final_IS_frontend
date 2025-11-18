@@ -16,6 +16,8 @@ function ListadoCanchas() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { token } = useAuth();
+  const { role } = useAuth(); // role debería ser 'ADMIN', 'PROPIETARIO', 'CLIENTE', etc.
+
 
   // Cargar canchas y jornadas iniciales 
   useEffect(() => {
@@ -115,9 +117,18 @@ function ListadoCanchas() {
             </button>
             <h1 className="text-2xl font-semibold text-[#213A58]">Canchas</h1>
           </div>
-          <Link to={`/crear_cancha?lugarId=${id}`} className="flex justify-end bg-black text-white p-2 pr-4 pl-4 rounded-full text-sm hover:opacity-90">
-            Crear nueva cancha
-          </Link>
+          {/* Solo mostrar el botón de crear cancha si el role es PROPIETARIO */}
+{role === 'PROPIETARIO' && (
+  <div>
+    <Link
+      to={`/crear_cancha?lugarId=${id}`}
+      className="flex justify-end bg-black text-white p-2 pr-4 pl-4 rounded-full text-sm hover:opacity-90"
+    >
+      Crear nueva cancha
+    </Link>
+  </div>
+)}
+
         </div>
 
         {alertaEliminado && (

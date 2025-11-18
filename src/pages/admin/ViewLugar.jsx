@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthProvider';
 const API_URL = import.meta.env.VITE_API_URL;  
 
+
+
 export default function ViewLugares() {
   const { token } = useAuth();
   const [lugares, setLugares] = useState([]);
@@ -11,7 +13,7 @@ export default function ViewLugares() {
   const [alertaError, setAlertaError] = useState(false);
   const porPagina = 3;
   const navigate = useNavigate();
-
+  const { role } = useAuth(); // role debería ser 'ADMIN', 'PROPIETARIO', 'CLIENTE', etc.
   // Obtener lugares del backend
   const fetchLugares = async () => {
     try {
@@ -75,11 +77,15 @@ export default function ViewLugares() {
       <div className="w-full bg-white rounded-xl p-6 space-y-6">
         {/* Encabezado */}
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-[#213A58]">Lugares</h1>
-          <Link to="/nuevo_lugar" className="px-4 py-2 bg-black text-white rounded-full text-sm">
-            Agregar un nuevo lugar
-          </Link>
-        </div>
+  <h1 className="text-2xl font-semibold text-[#213A58]">Lugares</h1>
+
+  {/* Solo mostrar el botón si el role es PROPIETARIO */}
+  {role === 'PROPIETARIO' && (
+    <Link to="/nuevo_lugar" className="px-4 py-2 bg-black text-white rounded-full text-sm">
+      Agregar un nuevo lugar
+    </Link>
+  )}
+</div>
 
         {alertaEliminado && (
           <div role="alert" className="alert alert-success">

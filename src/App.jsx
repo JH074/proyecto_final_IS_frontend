@@ -38,7 +38,7 @@ function App() {
           {/* Pública para todos */}
           <Route path="/" element={<Home />} />
 
-          {/* Rutas protegidas para USUARIO */}
+          {/* Rutas protegidas para CLIENTE */}
           <Route element={<RutaProtegida rolRequerido="CLIENTE" />}>
             <Route path="/info_canchas" element={<InfoCanchitas />} />
             <Route path="/reservar" element={<Reservacion />} />
@@ -46,20 +46,28 @@ function App() {
             <Route path="/solicitudes" element={<Solicitud />} />
           </Route>
 
-          {/* Rutas protegidas para ADMIN */}
-          <Route element={<RutaProtegida rolRequerido="ADMIN" />}>
+          {/* Rutas protegidas para ADMIN y PROPIETARIO */}
+          <Route element={<RutaProtegida allowedRoles={["ADMIN", "PROPIETARIO"]} />}>
+            {/* Reservaciones (vista general) */}
             <Route path="/reservaciones" element={<AllReservaciones />} />
-            
-            <Route path="/usuarios" element={<Usuarios />} />
-            <Route path="/usuario/:id/reservas" element={<UsuarioDetalle />} />
-            
+
+            {/* Reservas por cancha */}
             <Route path="/canchas/:id/reservas" element={<ListadoReservas />} />
+
+            {/* Canchas */}
             <Route path="/crear_cancha" element={<FormCancha />} />
             <Route path="/editar_cancha/:id" element={<FormCancha />} />
 
-            <Route path="/lugares/:id/canchas" element={<ListadoCanchas />} />
-            <Route path="/nuevo_lugar" element={<NewLugar />} />
+            {/* Lugares */}
             <Route path="/lugares" element={<ViewLugar />} />
+            <Route path="/nuevo_lugar" element={<NewLugar />} />
+            <Route path="/lugares/:id/canchas" element={<ListadoCanchas />} />
+          </Route>
+
+          {/* Rutas protegidas SOLO para ADMIN (gestión de usuarios) */}
+          <Route element={<RutaProtegida rolRequerido="ADMIN" />}>
+            <Route path="/usuarios" element={<Usuarios />} />
+            <Route path="/usuario/:id/reservas" element={<UsuarioDetalle />} />
           </Route>
         </Route>
 
