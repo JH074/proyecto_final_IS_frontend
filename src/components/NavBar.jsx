@@ -39,6 +39,7 @@ function NavBar() {
                 <li><Link to="/reservar">Crear reservación</Link></li>
                 <li><Link to="/mis_reservaciones">Mis reservaciones</Link></li>
                 <li><Link to="/solicitudes">Solicitud propietario</Link></li>
+                
               </>
             )}
 
@@ -55,6 +56,7 @@ function NavBar() {
                 <li><Link to="/reservaciones">Reservaciones</Link></li>
                 <li><Link to="/usuarios">Usuarios</Link></li>
                 <li><Link to="/lugares">Lugares</Link></li>
+                <li><Link to="/solicitudes-admin">Solicitudes</Link></li>
               </>
             )}
           </ul>

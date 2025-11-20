@@ -27,6 +27,8 @@ import ListadoReservas from "./pages/admin/ListadoReservas";
 import NewLugar from "./pages/admin/NewLugar";
 import ViewLugar from "./pages/admin/ViewLugar";
 import FormCancha from "./pages/admin/FormCancha";
+import SolicitudesAdmin from "./pages/admin/SolicitudesAdmin";
+
 
 function App() {
   return (
@@ -68,6 +70,9 @@ function App() {
           <Route element={<RutaProtegida rolRequerido="ADMIN" />}>
             <Route path="/usuarios" element={<Usuarios />} />
             <Route path="/usuario/:id/reservas" element={<UsuarioDetalle />} />
+
+            {/* Solicitud de cambio de rol */}
+            <Route path="/solicitudes-admin" element={<SolicitudesAdmin />} />
           </Route>
         </Route>
 
