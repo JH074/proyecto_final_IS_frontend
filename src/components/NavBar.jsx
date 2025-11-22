@@ -53,6 +53,7 @@ function NavBar() {
             {/* Menú ADMIN */}
             {token && role === 'ADMIN' && (
               <>
+                <li><Link to="/admin/solicitudes">Solicitudes</Link></li>
                 <li><Link to="/admin/reservaciones">Reservaciones</Link></li>
                 <li><Link to="/admin/usuarios">Usuarios</Link></li>
                 <li><Link to="/admin/lugares">Lugares</Link></li>

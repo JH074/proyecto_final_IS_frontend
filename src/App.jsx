@@ -25,6 +25,8 @@ import UsuarioDetalle from "./pages/admin/UsuarioDetalle";
 import ListadoCanchasAdmin from "./pages/admin/ListadoCanchas";
 import ListadoReservasAdmin from "./pages/admin/ListadoReservas";
 import ViewLugaresAdmin from "./pages/admin/ViewLugar";
+import SolicitudesAdmin from "./pages/admin/SolicitudesAdmin";
+import SolicitudDetalleAdmin from "./pages/admin/SolicitudDetalleAdmin";
 
 // Propietario
 import AllReservacionesPropietario from "./pages/propietario/AllReservacionesPropietario";
@@ -67,6 +69,9 @@ function App() {
             {/* Canchas (solo ver) y reservas por cancha (solo ver) */}
             <Route path="/admin/lugares/:id/canchas" element={<ListadoCanchasAdmin />} />
             <Route path="/admin/canchas/:id/reservas" element={<ListadoReservasAdmin />} />
+            <Route path="/admin/solicitudes" element={<SolicitudesAdmin />} />
+            <Route path="/admin/solicitudes/:id" element={<SolicitudDetalleAdmin />} />
+
           </Route>
 
           {/* ================= PROPIETARIO ================= */}
