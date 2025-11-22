@@ -9,7 +9,7 @@ import AuthLayout from "./layouts/AuthLayout";
 import RutaProtegida from "./routes/RutaProtegida";
 import RutaPublica from "./routes/RutaPublica";
 
-// Usuario
+// Usuario (CLIENTE)
 import Home from "./pages/Home";
 import InfoCanchitas from "./pages/InfoCanchitas";
 import Registro from "./pages/Registro";
@@ -19,26 +19,32 @@ import Reservacion from "./pages/usuario/Reservacion";
 import Solicitud from "./pages/usuario/Solicitud";
 
 // Admin
-import AllReservaciones from "./pages/admin/AllReservaciones";
+import AllReservacionesAdmin from "./pages/admin/AllReservaciones";
 import Usuarios from "./pages/admin/Usuarios";
 import UsuarioDetalle from "./pages/admin/UsuarioDetalle";
-import ListadoCanchas from "./pages/admin/ListadoCanchas";
-import ListadoReservas from "./pages/admin/ListadoReservas";
-import NewLugar from "./pages/admin/NewLugar";
-import ViewLugar from "./pages/admin/ViewLugar";
-import FormCancha from "./pages/admin/FormCancha";
+import ListadoCanchasAdmin from "./pages/admin/ListadoCanchas";
+import ListadoReservasAdmin from "./pages/admin/ListadoReservas";
+import ViewLugaresAdmin from "./pages/admin/ViewLugar";
+
+// Propietario
+import AllReservacionesPropietario from "./pages/propietario/AllReservacionesPropietario";
+import FormCanchaPropietario from "./pages/propietario/FormCanchaPropietario";
+import ListadoCanchasPropietario from "./pages/propietario/ListadoCanchasPropietario";
+import ListadoReservasPropietario from "./pages/propietario/ListadoReservasPropietario";
+import NewLugarPropietario from "./pages/propietario/NewLugarPropietario";
+import ViewLugaresPropietario from "./pages/propietario/ViewLugaresPropietario";
 
 function App() {
   return (
     <>
       <ScrollTop />
       <Routes>
-
+        {/* Layout principal */}
         <Route element={<MainLayout />}>
           {/* Pública para todos */}
           <Route path="/" element={<Home />} />
 
-          {/* Rutas protegidas para CLIENTE */}
+          {/* ================= CLIENTE ================= */}
           <Route element={<RutaProtegida rolRequerido="CLIENTE" />}>
             <Route path="/info_canchas" element={<InfoCanchitas />} />
             <Route path="/reservar" element={<Reservacion />} />
@@ -46,32 +52,41 @@ function App() {
             <Route path="/solicitudes" element={<Solicitud />} />
           </Route>
 
-          {/* Rutas protegidas para ADMIN y PROPIETARIO */}
-          <Route element={<RutaProtegida allowedRoles={["ADMIN", "PROPIETARIO"]} />}>
-            {/* Reservaciones (vista general) */}
-            <Route path="/reservaciones" element={<AllReservaciones />} />
+          {/* ================= ADMIN ================= */}
+          <Route element={<RutaProtegida rolRequerido="ADMIN" />}>
+            {/* Reservaciones (todas) */}
+            <Route path="/admin/reservaciones" element={<AllReservacionesAdmin />} />
 
-            {/* Reservas por cancha */}
-            <Route path="/canchas/:id/reservas" element={<ListadoReservas />} />
+            {/* Gestión de usuarios */}
+            <Route path="/admin/usuarios" element={<Usuarios />} />
+            <Route path="/admin/usuario/:id/reservas" element={<UsuarioDetalle />} />
 
-            {/* Canchas */}
-            <Route path="/crear_cancha" element={<FormCancha />} />
-            <Route path="/editar_cancha/:id" element={<FormCancha />} />
+            {/* Lugares (todos los lugares, sin crear/editar) */}
+            <Route path="/admin/lugares" element={<ViewLugaresAdmin />} />
 
-            {/* Lugares */}
-            <Route path="/lugares" element={<ViewLugar />} />
-            <Route path="/nuevo_lugar" element={<NewLugar />} />
-            <Route path="/lugares/:id/canchas" element={<ListadoCanchas />} />
+            {/* Canchas (solo ver) y reservas por cancha (solo ver) */}
+            <Route path="/admin/lugares/:id/canchas" element={<ListadoCanchasAdmin />} />
+            <Route path="/admin/canchas/:id/reservas" element={<ListadoReservasAdmin />} />
           </Route>
 
-          {/* Rutas protegidas SOLO para ADMIN (gestión de usuarios) */}
-          <Route element={<RutaProtegida rolRequerido="ADMIN" />}>
-            <Route path="/usuarios" element={<Usuarios />} />
-            <Route path="/usuario/:id/reservas" element={<UsuarioDetalle />} />
+          {/* ================= PROPIETARIO ================= */}
+          <Route element={<RutaProtegida rolRequerido="PROPIETARIO" />}>
+            {/* Reservaciones de sus canchas */}
+            <Route path="/propietario/reservaciones" element={<AllReservacionesPropietario />} />
+
+            {/* Lugares propios */}
+            <Route path="/propietario/lugares" element={<ViewLugaresPropietario />} />
+            <Route path="/propietario/nuevo_lugar" element={<NewLugarPropietario />} />
+
+            {/* Canchas del propietario */}
+            <Route path="/propietario/lugares/:id/canchas" element={<ListadoCanchasPropietario />} />
+            <Route path="/propietario/crear_cancha" element={<FormCanchaPropietario />} />
+            <Route path="/propietario/editar_cancha/:id" element={<FormCanchaPropietario />} />
+            <Route path="/propietario/canchas/:id/reservas" element={<ListadoReservasPropietario />} />
           </Route>
         </Route>
 
-        {/* Rutas públicas solo si no estás logueado */}
+        {/* ================= AUTENTICACIÓN (solo si NO estás logueado) ================= */}
         <Route element={<RutaPublica />}>
           <Route element={<AuthLayout />}>
             <Route path="/registro" element={<Registro />} />

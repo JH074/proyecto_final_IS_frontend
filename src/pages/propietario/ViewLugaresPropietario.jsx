@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthProvider';
 
-const API_URL = import.meta.env.VITE_API_URL;  
+const API_URL = import.meta.env.VITE_API_URL;
 
-export default function ViewLugaresAdmin() {
+export default function ViewLugaresPropietario() {
   const navigate = useNavigate();
-  const { token, role } = useAuth();    // ← traemos también el rol
+  const { token, role } = useAuth();
 
   const [lugares, setLugares] = useState([]);
   const [pagina, setPagina] = useState(1);
@@ -15,15 +15,14 @@ export default function ViewLugaresAdmin() {
   const porPagina = 3;
 
   useEffect(() => {
-    if (role && role !== 'ADMIN') {
-      navigate('/');     
+    if (role && role !== 'PROPIETARIO') {
+      navigate('/');
     }
   }, [role, navigate]);
 
-  // Obtener lugares del backend
   const fetchLugares = async () => {
     try {
-      if (!token || role !== 'ADMIN') return; // seguridad extra
+      if (!token || role !== 'PROPIETARIO') return;
 
       const response = await fetch(`${API_URL}/lugares`, {
         headers: {
@@ -47,7 +46,6 @@ export default function ViewLugaresAdmin() {
     fetchLugares();
   }, [token, role]);
 
-  // Eliminar lugar por ID (ADMIN)
   const handleEliminarLugar = async (id) => {
     const confirmacion = confirm('¿Estás seguro de que deseas eliminar este lugar?');
     if (!confirmacion) return;
@@ -87,14 +85,21 @@ export default function ViewLugaresAdmin() {
   return (
     <div className="m-12">
       <div className="w-full bg-white rounded-xl p-6 space-y-6">
-        {/* Encabezado */}
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-[#213A58]">Lugares</h1>
+          <h1 className="text-2xl font-semibold text-[#213A58]">Mis lugares</h1>
+          <Link
+            to="/propietario/nuevo_lugar"
+            className="px-4 py-2 bg-black text-white rounded-full text-sm"
+          >
+            Agregar un nuevo lugar
+          </Link>
         </div>
 
         {alertaEliminado && (
           <div role="alert" className="alert alert-success">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 className="h-6 w-6 shrink-0 stroke-current"
+                 fill="none" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -104,7 +109,9 @@ export default function ViewLugaresAdmin() {
 
         {alertaError && (
           <div role="alert" className="alert alert-error">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 className="h-6 w-6 shrink-0 stroke-current"
+                 fill="none" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                     d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -112,7 +119,6 @@ export default function ViewLugaresAdmin() {
           </div>
         )}
 
-        {/* Listado */}
         <div className="space-y-6">
           {lugaresPaginados.map((lugar) => (
             <div
@@ -151,6 +157,7 @@ export default function ViewLugaresAdmin() {
                 >
                   Eliminar
                 </button>
+
                 <button
                   type="button"
                   onClick={() => navigate(`/lugares/${lugar.idLugar}/canchas`)}
@@ -161,9 +168,12 @@ export default function ViewLugaresAdmin() {
               </div>
             </div>
           ))}
+
+          {lugares.length === 0 && (
+            <p className="text-gray-600">Aún no has registrado ningún lugar.</p>
+          )}
         </div>
 
-        {/* Paginación */}
         {totalPaginas > 1 && (
           <div className="flex justify-center items-center space-x-4 pt-4">
             <button
