@@ -47,32 +47,35 @@ export default function ViewLugaresAdmin() {
   }, [token, role]);
 
   const handleEliminarLugar = async (id) => {
-    const confirmacion = confirm('¿Estás seguro de que deseas eliminar este lugar?');
-    if (!confirmacion) return;
+  const confirmacion = confirm('¿Estás seguro de que deseas eliminar este lugar?');
+  if (!confirmacion) return;
 
-    try {
-      const response = await fetch(`${API_URL}/lugares/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+  try {
+    const response = await fetch(`${API_URL}/lugares/${id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
 
-      if (response.ok) {
-        setLugares(prev => prev.filter(l => l.idLugar !== id));
-        setAlertaEliminado(true);
-        setTimeout(() => setAlertaEliminado(false), 2000);
-      } else {
-        setAlertaError(true);
-        setTimeout(() => setAlertaError(false), 2000);
-      }
-    } catch (error) {
-      console.error('Error al hacer la solicitud DELETE:', error);
+    if (response.ok) {
+      setLugares(prev => prev.filter(l => l.idLugar !== id));
+      setAlertaEliminado(true);
+      setTimeout(() => setAlertaEliminado(false), 2000);
+    } else {
+      const msg = await response.text().catch(() => '');
+      console.error('Error al eliminar lugar (status):', response.status, msg);
       setAlertaError(true);
       setTimeout(() => setAlertaError(false), 2000);
     }
-  };
+  } catch (error) {
+    console.error('Error al hacer la solicitud DELETE:', error);
+    setAlertaError(true);
+    setTimeout(() => setAlertaError(false), 2000);
+  }
+};
+
 
   const totalPaginas = Math.ceil(lugares.length / porPagina);
   const inicio = (pagina - 1) * porPagina;
