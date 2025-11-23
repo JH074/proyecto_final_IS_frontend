@@ -15,6 +15,10 @@ function SolicitudDetalleAdmin() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [modalTipo, setModalTipo] = useState(null); // "aprobar" | "rechazar" | null
+const [motivoRechazo, setMotivoRechazo] = useState("");
+const MAX_PALABRAS = 200;
+const contarPalabras = (texto) =>
+  texto.trim() === "" ? 0 : texto.trim().split(/\s+/).length;
 
   // Solo ADMIN puede ver esta pantalla
   useEffect(() => {
@@ -75,46 +79,59 @@ function SolicitudDetalleAdmin() {
   }, [id, token]);
 
   // Llamar endpoint aprobar/rechazar
-  const handleAccion = async (tipo) => {
-    if (!solicitud) return false;
+const handleAccion = async (tipo) => {
+  if (!solicitud) return false;
 
-    setProcessing(true);
-    setErrorMsg(null);
+  setProcessing(true);
+  setErrorMsg(null);
 
-    try {
-      const res = await fetch(`${API_URL}/solicitudes/${id}/${tipo}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+  try {
+    const url = `${API_URL}/solicitudes/${id}/${tipo}`;
+
+    // definimos SIEMPRE options
+    const options = {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    // si es rechazo, mandamos el motivo en el body
+    if (tipo === "rechazar") {
+      options.body = JSON.stringify({
+        motivo: motivoRechazo.trim(),
       });
-
-      const text = await res.text();
-
-      if (!res.ok) {
-        throw new Error(text || "Error al procesar la solicitud");
-      }
-
-      const nuevoEstado = tipo === "aprobar" ? "APROBADA" : "RECHAZADA";
-
-      setSolicitud((prev) =>
-        prev ? { ...prev, estadoSolicitud: nuevoEstado } : prev
-      );
-
-      return true;
-    } catch (err) {
-      console.error(`Error al ${tipo} la solicitud:`, err);
-      setErrorMsg(err.message || "Ocurrió un error");
-      return false;
-    } finally {
-      setProcessing(false);
     }
-  };
+
+    const res = await fetch(url, options);
+    const text = await res.text();
+
+    if (!res.ok) {
+      throw new Error(text || "Error al procesar la solicitud");
+    }
+
+    const nuevoEstado = tipo === "aprobar" ? "APROBADA" : "RECHAZADA";
+
+    setSolicitud((prev) =>
+      prev ? { ...prev, estadoSolicitud: nuevoEstado } : prev
+    );
+
+    return true;
+  } catch (err) {
+    console.error(`Error al ${tipo} la solicitud:`, err);
+    setErrorMsg(err.message || "Ocurrió un error");
+    return false;
+  } finally {
+    setProcessing(false);
+  }
+};
+
 
   // Confirmar desde el modal
   const handleConfirmAccion = async () => {
     if (!modalTipo) return;
+      const motivo = modalTipo === "rechazar" ? motivoRechazo.trim() : null;
     const ok = await handleAccion(modalTipo);
     if (ok) {
       setModalTipo(null);
@@ -293,8 +310,11 @@ function SolicitudDetalleAdmin() {
       <button
         className="btn bg-red-600 text-white"
         disabled={processing}
-        onClick={() => setModalTipo("rechazar")}
-      >
+  onClick={() => {
+    setMotivoRechazo("");
+    setModalTipo("rechazar");
+  }}
+        >
         Rechazar solicitud
       </button>
     </>
@@ -305,38 +325,62 @@ function SolicitudDetalleAdmin() {
 
       {/* MODAL DE CONFIRMACIÓN */}
 {modalTipo && isPendiente && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md space-y-4">
-            <h2 className="text-lg font-semibold text-[#213A58]">
-              {modalTipo === "aprobar"
-                ? "Aprobar solicitud"
-                : "Rechazar solicitud"}
-            </h2>
-            <p>
-              ¿Estás seguro de que deseas{" "}
-              {modalTipo === "aprobar" ? "aprobar" : "rechazar"} esta solicitud?
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                className="btn btn-outline"
-                onClick={() => setModalTipo(null)}
-                disabled={processing}
-              >
-                No, cancelar
-              </button>
-              <button
-                className={`btn text-white ${
-                  modalTipo === "aprobar" ? "bg-green-600" : "bg-red-600"
-                }`}
-                onClick={handleConfirmAccion}
-                disabled={processing}
-              >
-                {processing ? "Procesando..." : "Sí, confirmar"}
-              </button>
-            </div>
-          </div>
+  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg p-6 w-full max-w-md space-y-4">
+      <h2 className="text-lg font-semibold text-[#213A58]">
+        {modalTipo === "aprobar" ? "Aprobar solicitud" : "Rechazar solicitud"}
+      </h2>
+
+      <p>
+        ¿Estás seguro de que deseas{" "}
+        {modalTipo === "aprobar" ? "aprobar" : "rechazar"} esta solicitud?
+      </p>
+
+      {modalTipo === "rechazar" && (
+        <div className="space-y-1">
+          <label className="block text-sm font-medium text-gray-700">
+            Motivo del rechazo (máx. 200 caracteres)
+          </label>
+          <textarea
+            className="w-full border rounded px-3 py-2 text-sm"
+            rows={3}
+            maxLength={200} // límite duro
+            value={motivoRechazo}
+            onChange={(e) => setMotivoRechazo(e.target.value)}
+            placeholder="Ejemplo: La información del establecimiento está incompleta..."
+          />
+          <p className="text-xs text-gray-500 text-right">
+            {motivoRechazo.length}/200 caracteres
+          </p>
         </div>
       )}
+
+      <div className="flex justify-end gap-3 pt-2">
+        <button
+          className="btn btn-outline"
+          onClick={() => setModalTipo(null)}
+          disabled={processing}
+        >
+          No, cancelar
+        </button>
+        <button
+          className={`btn text-white ${
+            modalTipo === "aprobar" ? "bg-green-600" : "bg-red-600"
+          }`}
+          onClick={handleConfirmAccion}
+          disabled={
+            processing ||
+            (modalTipo === "rechazar" && motivoRechazo.trim().length === 0)
+          }
+        >
+          {processing ? "Procesando..." : "Sí, confirmar"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
     </>
   );
 }
