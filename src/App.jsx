@@ -69,6 +69,7 @@ function App() {
             {/* Canchas (solo ver) y reservas por cancha (solo ver) */}
             <Route path="/admin/lugares/:id/canchas" element={<ListadoCanchasAdmin />} />
             <Route path="/admin/canchas/:id/reservas" element={<ListadoReservasAdmin />} />
+            <Route path="/lugares/:id/canchas" element={<ListadoCanchasAdmin />} />
             <Route path="/admin/solicitudes" element={<SolicitudesAdmin />} />
             <Route path="/admin/solicitudes/:id" element={<SolicitudDetalleAdmin />} />
 

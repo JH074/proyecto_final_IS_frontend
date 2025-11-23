@@ -6,7 +6,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export default function ViewLugaresAdmin() {
   const navigate = useNavigate();
-  const { token, role } = useAuth();    // ← traemos también el rol
+  const { token, role } = useAuth();
 
   const [lugares, setLugares] = useState([]);
   const [pagina, setPagina] = useState(1);
@@ -20,10 +20,9 @@ export default function ViewLugaresAdmin() {
     }
   }, [role, navigate]);
 
-  // Obtener lugares del backend
   const fetchLugares = async () => {
     try {
-      if (!token || role !== 'ADMIN') return; // seguridad extra
+      if (!token || role !== 'ADMIN') return;
 
       const response = await fetch(`${API_URL}/lugares`, {
         headers: {
@@ -47,7 +46,6 @@ export default function ViewLugaresAdmin() {
     fetchLugares();
   }, [token, role]);
 
-  // Eliminar lugar por ID (ADMIN)
   const handleEliminarLugar = async (id) => {
     const confirmacion = confirm('¿Estás seguro de que deseas eliminar este lugar?');
     if (!confirmacion) return;
@@ -87,7 +85,6 @@ export default function ViewLugaresAdmin() {
   return (
     <div className="m-12">
       <div className="w-full bg-white rounded-xl p-6 space-y-6">
-        {/* Encabezado */}
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-[#213A58]">Lugares</h1>
         </div>
@@ -112,7 +109,6 @@ export default function ViewLugaresAdmin() {
           </div>
         )}
 
-        {/* Listado */}
         <div className="space-y-6">
           {lugaresPaginados.map((lugar) => (
             <div
@@ -163,7 +159,6 @@ export default function ViewLugaresAdmin() {
           ))}
         </div>
 
-        {/* Paginación */}
         {totalPaginas > 1 && (
           <div className="flex justify-center items-center space-x-4 pt-4">
             <button
