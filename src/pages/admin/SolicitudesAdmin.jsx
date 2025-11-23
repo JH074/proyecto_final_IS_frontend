@@ -48,7 +48,7 @@ function SolicitudesAdmin() {
 
   // Filtro por estado
   const solicitudesFiltradas = solicitudes.filter((s) =>
-    filtro === "TODAS" ? true : s.estado === filtro
+    filtro === "TODAS" ? true : s.estadoSolicitud === filtro
   );
 
   // Paginación
@@ -67,15 +67,6 @@ function SolicitudesAdmin() {
     navigate(`/admin/solicitudes/${idSolicitud}`);
   };
 
-  // ✅ Card de ejemplo fija (puedes borrarla luego si quieres)
-  const ejemploSolicitud = {
-    idSolicitud: 999,
-    nombreCompleto: "Ejemplo Propietario",
-    correo: "ejemplo@correo.com",
-    telefono: "7777-7777",
-    zonaId: 3,
-    estado: "PENDIENTE",
-  };
 
   return (
     <div className="m-12">
@@ -141,75 +132,7 @@ function SolicitudesAdmin() {
         </div>
 
         <div className="space-y-4">
-          {/* 🔹 Card de ejemplo (visual) */}
-          <div className="w-full bg-white border border-dashed border-gray-400 rounded-xl p-4">
-            <p className="text-xs text-gray-500 mb-2">
-              Ejemplo de tarjeta (solo de muestra):
-            </p>
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <h2 className="font-semibold text-[#213A58]">
-                  {ejemploSolicitud.nombreCompleto}
-                </h2>
-                <p className="text-sm text-gray-700">
-                  Correo: {ejemploSolicitud.correo}
-                </p>
-                <p className="text-sm text-gray-700">
-                  Teléfono: {ejemploSolicitud.telefono}
-                </p>
-                <p className="text-sm text-gray-700">
-                  Zona ID: {ejemploSolicitud.zonaId}
-                </p>
-              </div>
-              <span className="px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">
-                {ejemploSolicitud.estado}
-              </span>
-            </div>
-            <div className="flex justify-end">
-              <button
-                type="button"
-                className="px-4 py-1 bg-black text-white rounded-full text-sm hover:opacity-90"
-                onClick={() => navigate("/admin/solicitudes/ejemplo")} 
-                >
-                Ver
-                </button>
-
-            </div>
-          </div>
-          
-          {/* 🔹 Card de ejemplo (visual) */}
-          <div className="w-full bg-white border border-dashed border-gray-400 rounded-xl p-4">
-            <p className="text-xs text-gray-500 mb-2">
-              Ejemplo de tarjeta (solo de muestra):
-            </p>
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <h2 className="font-semibold text-[#213A58]">
-                  {ejemploSolicitud.nombreCompleto}
-                </h2>
-                <p className="text-sm text-gray-700">
-                  Correo: {ejemploSolicitud.correo}
-                </p>
-                <p className="text-sm text-gray-700">
-                  Teléfono: {ejemploSolicitud.telefono}
-                </p>
-                <p className="text-sm text-gray-700">
-                  Zona ID: {ejemploSolicitud.zonaId}
-                </p>
-              </div>
-              <span className="px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">
-                {ejemploSolicitud.estado}
-              </span>
-            </div>
-            <div className="flex justify-end">
-              <button
-                type="button"
-                className="px-4 py-1 bg-black text-white rounded-full text-sm opacity-60 cursor-not-allowed"
-              >
-                Ver
-              </button>
-            </div>
-          </div>
+         
 
           {/* 🔹 Cards reales desde el backend */}
           {solicitudesPaginadas.map((s) => (
@@ -227,22 +150,22 @@ function SolicitudesAdmin() {
                     Teléfono: {s.telefono}
                   </p>
                   <p className="text-sm text-gray-700">
-                    Zona ID: {s.zonaId}
+                    Zona: {s.zona}
                   </p>
                 </div>
 
                 <span
                   className={`px-3 py-1 rounded-full text-xs ${
-                    s.estado === "PENDIENTE"
+                    s.estadoSolicitud === "PENDIENTE"
                       ? "bg-yellow-100 text-yellow-700"
-                      : s.estado === "APROBADA"
+                      : s.estadoSolicitud === "APROBADA"
                       ? "bg-green-100 text-green-700"
-                      : s.estado === "RECHAZADA"
+                      : s.estadoSolicitud === "RECHAZADA"
                       ? "bg-red-100 text-red-700"
                       : "bg-gray-100 text-gray-700"
                   }`}
                 >
-                  {s.estado}
+                  {s.estadoSolicitud}
                 </span>
               </div>
 
