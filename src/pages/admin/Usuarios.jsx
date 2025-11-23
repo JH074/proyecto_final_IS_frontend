@@ -57,7 +57,7 @@ function Usuarios() {
   const usuariosPaginados = usuarios.slice(inicio, inicio + porPagina);
 
   const handleVerReservas = (usuarioId) => {
-    navigate(`/usuario/${usuarioId}/reservas`);
+    navigate(`/usuarios/${usuarioId}/reservas`);
   };
 
   const handleEliminar = async (usuarioId) => {

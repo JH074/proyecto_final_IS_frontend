@@ -72,6 +72,8 @@ function App() {
             <Route path="/lugares/:id/canchas" element={<ListadoCanchasAdmin />} />
             <Route path="/admin/solicitudes" element={<SolicitudesAdmin />} />
             <Route path="/admin/solicitudes/:id" element={<SolicitudDetalleAdmin />} />
+            <Route path="/canchas/:id/reservas" element={<ListadoReservasAdmin />} />
+            <Route path="/usuarios/:id/reservas" element={<UsuarioDetalle />} />
 
           </Route>
 

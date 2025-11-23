@@ -228,11 +228,12 @@ export default function NewLugarPropietario() {
           <div className="flex justify-end space-x-4 mt-2">
             <button
               type="button"
-              onClick={handleCancel}
-              className="px-4 py-2 bg-white border border-gray-400 text-[#213A58] rounded"
+              className="btn boton-cancelar"
+              onClick={() => navigate("/propietario/lugares")}
             >
               Cancelar
             </button>
+
             <button
               type="submit"
               className="px-4 py-2 bg-[#213A58] text-white rounded"
