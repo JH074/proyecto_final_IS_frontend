@@ -6,7 +6,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export default function ViewLugaresPropietario() {
   const navigate = useNavigate();
-  const { token, role } = useAuth();
+  const { token, role, user } = useAuth(); 
 
   const [lugares, setLugares] = useState([]);
   const [pagina, setPagina] = useState(1);
@@ -14,6 +14,7 @@ export default function ViewLugaresPropietario() {
   const [alertaError, setAlertaError] = useState(false);
   const porPagina = 3;
 
+  // Solo PROPIETARIO puede entrar
   useEffect(() => {
     if (role && role !== 'PROPIETARIO') {
       navigate('/');
@@ -22,21 +23,24 @@ export default function ViewLugaresPropietario() {
 
   const fetchLugares = async () => {
     try {
-      if (!token || role !== 'PROPIETARIO') return;
+      if (!token || role !== 'PROPIETARIO' || !user) return;
 
-      const response = await fetch(`${API_URL}/lugares`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `${API_URL}/lugares/mis-lugares/${user.id}`,  
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         }
-      });
+      );
 
       if (!response.ok) {
         throw new Error('Error al cargar los lugares');
       }
 
       const data = await response.json();
-      setLugares(data);
+      setLugares(data);  
     } catch (error) {
       console.error('Error al cargar los lugares:', error);
     }
@@ -44,7 +48,7 @@ export default function ViewLugaresPropietario() {
 
   useEffect(() => {
     fetchLugares();
-  }, [token, role]);
+  }, [token, role, user]);
 
   const handleEliminarLugar = async (id) => {
     const confirmacion = confirm('¿Estás seguro de que deseas eliminar este lugar?');
@@ -97,11 +101,18 @@ export default function ViewLugaresPropietario() {
 
         {alertaEliminado && (
           <div role="alert" className="alert alert-success">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 className="h-6 w-6 shrink-0 stroke-current"
-                 fill="none" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
             <span>Lugar eliminado correctamente.</span>
           </div>
@@ -109,11 +120,18 @@ export default function ViewLugaresPropietario() {
 
         {alertaError && (
           <div role="alert" className="alert alert-error">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 className="h-6 w-6 shrink-0 stroke-current"
-                 fill="none" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
             <span>No se pudo eliminar el lugar.</span>
           </div>
@@ -160,11 +178,12 @@ export default function ViewLugaresPropietario() {
 
                 <button
                   type="button"
-                  onClick={() => navigate(`/lugares/${lugar.idLugar}/canchas`)}
+                  onClick={() => navigate(`/propietario/lugares/${lugar.idLugar}/canchas`)}
                   className="px-4 py-2 bg-black text-white rounded-full text-sm hover:opacity-90"
-                >
+                  >
                   Canchas
-                </button>
+                  </button>
+
               </div>
             </div>
           ))}
