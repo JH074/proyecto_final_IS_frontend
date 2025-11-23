@@ -99,9 +99,11 @@ const checkEstado = async () => {
     } else if (estadoActual === "RECHAZADA") {
       setNotification({
         type: "error",
-        message:
-          "Tu solicitud ha sido rechazada. Revisa tus datos o contacta al administrador.",
-      });
+    message:
+      motivo && motivo.trim().length > 0
+        ? `Tu solicitud ha sido rechazada. Motivo: ${motivo}`
+        : "Tu solicitud ha sido rechazada. Revisa tus datos o contacta al administrador.",
+  });
     } else {
       setNotification(null);
     }
