@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthProvider';
 
-const API_URL = import.meta.env.VITE_API_URL;  
+const API_URL = import.meta.env.VITE_API_URL;
 
-export default function ViewLugaresAdmin() {
+export default function ViewLugaresPropietario() {
   const navigate = useNavigate();
-  const { token, role } = useAuth();
+  const { token, role, user } = useAuth(); 
 
   const [lugares, setLugares] = useState([]);
   const [pagina, setPagina] = useState(1);
@@ -14,29 +14,33 @@ export default function ViewLugaresAdmin() {
   const [alertaError, setAlertaError] = useState(false);
   const porPagina = 3;
 
+  // Solo PROPIETARIO puede entrar
   useEffect(() => {
-    if (role && role !== 'ADMIN') {
-      navigate('/');     
+    if (role && role !== 'PROPIETARIO') {
+      navigate('/');
     }
   }, [role, navigate]);
 
   const fetchLugares = async () => {
     try {
-      if (!token || role !== 'ADMIN') return;
+      if (!token || role !== 'PROPIETARIO' || !user) return;
 
-      const response = await fetch(`${API_URL}/lugares`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `${API_URL}/lugares/mis-lugares/${user.id}`,  
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         }
-      });
+      );
 
       if (!response.ok) {
         throw new Error('Error al cargar los lugares');
       }
 
       const data = await response.json();
-      setLugares(data);
+      setLugares(data);  
     } catch (error) {
       console.error('Error al cargar los lugares:', error);
     }
@@ -44,7 +48,7 @@ export default function ViewLugaresAdmin() {
 
   useEffect(() => {
     fetchLugares();
-  }, [token, role]);
+  }, [token, role, user]);
 
   const handleEliminarLugar = async (id) => {
     const confirmacion = confirm('¿Estás seguro de que deseas eliminar este lugar?');
@@ -86,14 +90,29 @@ export default function ViewLugaresAdmin() {
     <div className="m-12">
       <div className="w-full bg-white rounded-xl p-6 space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-[#213A58]">Lugares</h1>
+          <h1 className="text-2xl font-semibold text-[#213A58]">Mis lugares</h1>
+          <Link
+            to="/propietario/nuevo_lugar"
+            className="px-4 py-2 bg-black text-white rounded-full text-sm"
+          >
+            Agregar un nuevo lugar
+          </Link>
         </div>
 
         {alertaEliminado && (
           <div role="alert" className="alert alert-success">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
             <span>Lugar eliminado correctamente.</span>
           </div>
@@ -101,9 +120,18 @@ export default function ViewLugaresAdmin() {
 
         {alertaError && (
           <div role="alert" className="alert alert-error">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
             <span>No se pudo eliminar el lugar.</span>
           </div>
@@ -147,16 +175,22 @@ export default function ViewLugaresAdmin() {
                 >
                   Eliminar
                 </button>
+
                 <button
                   type="button"
-                  onClick={() => navigate(`/lugares/${lugar.idLugar}/canchas`)}
+                  onClick={() => navigate(`/propietario/lugares/${lugar.idLugar}/canchas`)}
                   className="px-4 py-2 bg-black text-white rounded-full text-sm hover:opacity-90"
-                >
+                  >
                   Canchas
-                </button>
+                  </button>
+
               </div>
             </div>
           ))}
+
+          {lugares.length === 0 && (
+            <p className="text-gray-600">Aún no has registrado ningún lugar.</p>
+          )}
         </div>
 
         {totalPaginas > 1 && (

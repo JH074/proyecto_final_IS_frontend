@@ -13,6 +13,10 @@ function MisReservaciones() {
   const [cancelSuccess, setCancelSuccess] = useState(false);
   const porPagina = 2;
 
+  // nuevo estado para modal
+  const [modalOpen, setModalOpen] = useState(false);
+  const [reservaSeleccionada, setReservaSeleccionada] = useState(null);
+
   // Fetch pendientes
   useEffect(() => {
     if (!user?.id) return;
@@ -55,8 +59,35 @@ function MisReservaciones() {
     inicioRealizadas + porPagina
   );
 
+   // nueva: abre modal
+  const solicitarCancelacion = (idReserva) => {
+    setReservaSeleccionada(idReserva);
+    setModalOpen(true);
+  };
+
+  // nueva: confirma y hace DELETE
+  const confirmarCancelacion = async () => {
+    if (!reservaSeleccionada) return;
+
+    try {
+      const res = await fetch(`${API_URL}/reservas/${reservaSeleccionada}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Error cancelando reserva");
+      setPendientes((prev) => prev.filter((r) => r.idReserva !== reservaSeleccionada));
+      setCancelSuccess(true);
+      setTimeout(() => setCancelSuccess(false), 3000);
+    } catch (err) {
+      alert("No se pudo cancelar la reserva.");
+    } finally {
+      setModalOpen(false);
+      setReservaSeleccionada(null);
+    }
+  };
+
   // Cancelar reserva
-  const handleCancelar = async (idReserva) => {
+  /*const handleCancelar = async (idReserva) => {
     if (!window.confirm("¿Estás seguro de cancelar esta reserva?")) return;
     try {
       const res = await fetch(`${API_URL}/reservas/${idReserva}`, {
@@ -72,6 +103,7 @@ function MisReservaciones() {
       alert("No se pudo cancelar la reserva.");
     }
   };
+  */
 
   return (
     <div className="m-12 bg-[#E4EFFD] min-h-screen flex justify-center">
@@ -106,7 +138,7 @@ function MisReservaciones() {
               <CardReserva
                 key={reserva.idReserva}
                 reserva={reserva}
-                handleCancelar={handleCancelar}
+                handleCancelar={solicitarCancelacion} //aqui cambie handlereserva por solicitar cancelacion
               />
             ))}
             {totalPaginasPendientes > 1 && (
@@ -169,6 +201,36 @@ function MisReservaciones() {
           <p className="text-gray-500">No tienes reservaciones aún.</p>
         )}
       </div>
+
+      {/* Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl max-w-md w-[90%] mx-4 text-center">
+            <h2 className="text-lg font-semibold mb-2 text-[#213A58]">Cancelar Reserva</h2>
+            <p className="text-sm text-gray-600 mb-6">
+              ¿Estás seguro de que deseas cancelar la Reserva #{reservaSeleccionada}?
+              <br />
+              Esta acción no se puede deshacer.
+            </p>
+
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => { setModalOpen(false); setReservaSeleccionada(null); }}
+                className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200"
+              >
+                Volver atrás
+              </button>
+
+              <button
+                onClick={confirmarCancelacion}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
+              >
+                Confirmar cancelación
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

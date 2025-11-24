@@ -1,11 +1,11 @@
-// src/pages/admin/AllReservacionesAdmin.jsx
+// src/pages/propietario/AllReservacionesPropietario.jsx
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthProvider";
 import { FaCalendarAlt } from "react-icons/fa";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export default function AllReservacionesAdmin() {
+export default function AllReservacionesPropietario() {
   const { token } = useAuth();
   const [reservas, setReservas] = useState([]);
   const [filtroFecha, setFiltroFecha] = useState("");
@@ -13,7 +13,6 @@ export default function AllReservacionesAdmin() {
   const porPagina = 3;
   const dateInputRef = useRef(null);
 
-  // 1) Traer todas las reservas al montar
   useEffect(() => {
     fetch(`${API_URL}/reservas`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -38,17 +37,14 @@ export default function AllReservacionesAdmin() {
       .catch((err) => console.error("Error cargando reservas:", err));
   }, [token]);
 
-  // 2) Filtrar por fecha exacta (YYYY-MM-DD)
   const reservasFiltradas = filtroFecha
     ? reservas.filter((r) => r.fechaReserva === filtroFecha)
     : reservas;
 
-  // 3) Paginación
   const totalPaginas = Math.ceil(reservasFiltradas.length / porPagina);
   const inicio = (pagina - 1) * porPagina;
   const actuales = reservasFiltradas.slice(inicio, inicio + porPagina);
 
-  // Scroll on page change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [pagina]);
@@ -57,7 +53,7 @@ export default function AllReservacionesAdmin() {
     <div className="m-12">
       <div className="w-full bg-white rounded-xl p-6 space-y-6">
         <h1 className="text-2xl font-semibold text-[#213A58]">
-          Reservaciones actuales
+          Reservaciones de tus canchas
         </h1>
 
         {/* Filtro por fecha */}

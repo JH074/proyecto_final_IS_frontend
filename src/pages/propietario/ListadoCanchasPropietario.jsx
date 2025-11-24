@@ -1,3 +1,4 @@
+// src/pages/propietario/ListadoCanchasPropietario.jsx
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
@@ -6,14 +7,14 @@ const API_URL = import.meta.env.VITE_API_URL;
 const diasSemana = [
   "LUNES",
   "MARTES",
-  "MIÉRCOLES",
+  "MIERCOLES",
   "JUEVES",
   "VIERNES",
-  "SÁBADO",
+  "SABADO",
   "DOMINGO",
 ];
 
-function ListadoCanchas() {
+function ListadoCanchasPropietario() {
   const [pagina, setPagina] = useState(1);
   const [canchas, setCanchas] = useState([]);
   const [alertaEliminado, setAlertaEliminado] = useState(false);
@@ -24,29 +25,62 @@ function ListadoCanchas() {
 
   const navigate = useNavigate();
   const { id } = useParams(); // id del lugar
-  const { token, role } = useAuth();
+  const { token, role, user } = useAuth();
 
-  // Cargar canchas y jornadas iniciales
+  // 🔒 Si no es PROPIETARIO, sacarlo de aquí
   useEffect(() => {
-    if (!token) return;
+    if (role && role !== "PROPIETARIO") {
+      navigate("/");
+    }
+  }, [role, navigate]);
 
-    fetch(`${API_URL}/lugares/${id}/canchas`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setCanchas(data);
-        data.forEach((cancha) => {
+  // Cargar canchas del propietario y filtrar por lugar
+  useEffect(() => {
+    if (!token || !user || role !== "PROPIETARIO") return;
+
+    const fetchCanchas = async () => {
+      try {
+        // Trae solo las canchas del propietario
+        const res = await fetch(
+          `${API_URL}/canchas/mis-canchas/${user.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error("Error cargando canchas");
+        }
+
+        const data = await res.json();
+
+        // Filtrar por lugar actual
+        const canchasDeEsteLugar = data.filter(
+          (c) => c.lugarId === Number(id)
+        );
+
+        setCanchas(canchasDeEsteLugar);
+
+        // Configurar día inicial y cargar jornadas
+        canchasDeEsteLugar.forEach((cancha) => {
           const diaInicial = "LUNES";
-          setDiasSeleccionados((prev) => ({ ...prev, [cancha.id]: diaInicial }));
-          cargarJornadas(cancha.id, diaInicial);
+          setDiasSeleccionados((prev) => ({
+            ...prev,
+            [cancha.idCancha]: diaInicial,
+          }));
+          cargarJornadas(cancha.idCancha, diaInicial);
         });
-      })
-      .catch((err) => console.error("Error cargando canchas:", err));
-  }, [id, token]);
+      } catch (err) {
+        console.error("Error cargando canchas:", err);
+      }
+    };
+
+    fetchCanchas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, role, user, id]);
 
   const cargarJornadas = async (canchaId, dia) => {
     try {
@@ -81,14 +115,14 @@ function ListadoCanchas() {
     cargarJornadas(canchaId, dia);
   };
 
-  const handleEliminarCancha = async (idCancha) => {
+  const handleEliminarCancha = async (canchaId) => {
     const confirmacion = confirm(
       "¿Estás seguro de que deseas eliminar esta cancha?"
     );
     if (!confirmacion) return;
 
     try {
-      const response = await fetch(`${API_URL}/canchas/${idCancha}`, {
+      const response = await fetch(`${API_URL}/canchas/${canchaId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -97,7 +131,9 @@ function ListadoCanchas() {
       });
 
       if (response.ok) {
-        setCanchas((prev) => prev.filter((c) => c.id !== idCancha));
+        setCanchas((prev) =>
+          prev.filter((c) => c.idCancha !== canchaId)
+        );
         setAlertaEliminado(true);
         setTimeout(() => setAlertaEliminado(false), 2000);
       } else {
@@ -121,7 +157,7 @@ function ListadoCanchas() {
         <div className="flex justify-between items-center mb-6">
           <div className="grid grid-cols-2 items-center">
             <button
-              onClick={() => navigate("/admin/lugares")}
+              onClick={() => navigate("/propietario/lugares")}
               className="p-2 rounded-full justify-self-start bg-[#213A58] text-white hover:bg-[#1a2f47]"
               aria-label="Volver"
             >
@@ -140,20 +176,20 @@ function ListadoCanchas() {
                 />
               </svg>
             </button>
-            <h1 className="text-2xl font-semibold text-[#213A58]">Canchas</h1>
+            <h1 className="text-2xl font-semibold text-[#213A58]">
+              Canchas
+            </h1>
           </div>
 
-          {/* Solo mostrar el botón de crear cancha si el role es PROPIETARIO */}
-          {role === "PROPIETARIO" && (
-            <div>
-              <Link
-                to={`/crear_cancha?lugarId=${id}`}
-                className="flex justify-end bg-black text-white p-2 pr-4 pl-4 rounded-full text-sm hover:opacity-90"
+          {/* Solo PROPIETARIO puede crear canchas */}
+          <div>
+            <Link
+              to={`/propietario/crear_cancha?lugarId=${id}`}
+              className="flex justify-end bg-black text-white p-2 pr-4 pl-4 rounded-full text-sm hover:opacity-90"
               >
-                Crear nueva cancha
+              Crear nueva cancha
               </Link>
-            </div>
-          )}
+          </div>
         </div>
 
         {alertaEliminado && (
@@ -175,6 +211,12 @@ function ListadoCanchas() {
           </div>
         )}
 
+        {alertaError && (
+          <div role="alert" className="alert alert-error">
+            <span>Ocurrió un error al eliminar la cancha.</span>
+          </div>
+        )}
+
         {canchas.length === 0 ? (
           <div className="text-center text-gray-500 py-12">
             No hay canchas registradas aún para este lugar.
@@ -182,13 +224,14 @@ function ListadoCanchas() {
         ) : (
           <>
             {canchasPaginadas.map((cancha) => {
-              const diaActual = diasSeleccionados[cancha.id] || "LUNES";
+              const idCancha = cancha.idCancha;
+              const diaActual = diasSeleccionados[idCancha] || "LUNES";
               const jornadasDelDia =
-                jornadasPorCancha[cancha.id]?.[diaActual] || [];
+                jornadasPorCancha[idCancha]?.[diaActual] || [];
 
               return (
                 <div
-                  key={cancha.id}
+                  key={idCancha}
                   className="w-full bg-white border border-black rounded-xl p-6 space-y-4"
                 >
                   <div className="grid grid-cols-2 justify-between">
@@ -204,7 +247,7 @@ function ListadoCanchas() {
                         {diasSemana.map((dia) => (
                           <button
                             key={dia}
-                            onClick={() => cambiarDia(cancha.id, dia)}
+                            onClick={() => cambiarDia(idCancha, dia)}
                             className={`px-3 py-1 text-sm ${
                               diaActual === dia
                                 ? "bg-[#213A58] text-white"
@@ -238,22 +281,26 @@ function ListadoCanchas() {
                   <div className="flex gap-2 flex-wrap justify-end mt-12">
                     <button
                       className="bg-gray-200 text-red-500 px-4 py-1 rounded-full text-sm"
-                      onClick={() => handleEliminarCancha(cancha.id)}
+                      onClick={() => handleEliminarCancha(idCancha)}
                     >
                       Eliminar
                     </button>
-
-                    {/* 🔗 Ver reservas de ESTA cancha (ruta de ADMIN) */}
                     <button
-                      onClick={() =>
-                        navigate(`/canchas/${cancha.id}/reservas`)
-                      }
-                      className="bg-black text-white px-4 py-1 rounded-full text-sm"
-                    >
-                      Ver reservas
-                    </button>
+                onClick={() =>
+                navigate(`/propietario/canchas/${idCancha}/reservas`)
+                }
+                className="bg-black text-white px-4 py-1 rounded-full text-sm"
+                >
+                Ver reservas
+                </button>
 
-                    {/* ❌ Botón Editar eliminado para ADMIN */}
+                <Link
+                to={`/propietario/editar_cancha/${idCancha}`}
+                className="bg-black text-white px-4 py-1 rounded-full text-sm"
+                  >
+                  Editar
+                </Link>
+
                   </div>
                 </div>
               );
@@ -287,4 +334,4 @@ function ListadoCanchas() {
   );
 }
 
-export default ListadoCanchas;
+export default ListadoCanchasPropietario;

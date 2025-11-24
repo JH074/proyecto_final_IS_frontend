@@ -3,7 +3,7 @@ import Dropdown from "../../components/Dropdown";
 import CalendarioReservas from "../../components/CalendarioReservas";
 import SelectorHoras from "../../components/SelectorHoras";
 import { useAuth } from "../../context/AuthProvider";
-const API_URL = import.meta.env.VITE_API_URL;  
+const API_URL = import.meta.env.VITE_API_URL;
 
 function Reservacion() {
     const { token, user } = useAuth();
@@ -47,12 +47,45 @@ function Reservacion() {
         l => l.value === (typeof lugar === "string" ? parseInt(lugar, 10) : lugar)
     )?.label || "";
 
+    //Para calificar canchas
+    const [rating, setRating] = useState(null);
+    const [userRating, setUserRating] = useState(0);
+    const [totalCalificaciones, setTotalCalificaciones] = useState(0);
+
+
+
 
     // Variables de detalle, con valores por defecto
     let hInicio = null;
     let numBloques = 0;
     let totalReal = 0;
     let horaSalida = "";
+
+    // Cuando cambia la zona, limpia lugar, tipo de cancha y cancha
+    useEffect(() => {
+        setLugar("");
+        setTipoCancha("");
+        setCancha("");
+        setCanchaSeleccionada(null);
+        setLugaresDisponibles([]);
+        setTiposCanchasDisponibles([]);
+        setCanchasDisponibles([]);
+    }, [zona]);
+
+    // Cuando cambia el lugar, limpia tipo de cancha y cancha
+    useEffect(() => {
+        setTipoCancha("");
+        setCancha("");
+        setCanchaSeleccionada(null);
+        setTiposCanchasDisponibles([]);
+        setCanchasDisponibles([]);
+    }, [lugar]);
+
+    // Cuando cambia el tipo de cancha, limpia solo la cancha
+    useEffect(() => {
+        setCancha("");
+        setCanchaSeleccionada(null);
+    }, [tipoCancha]);
 
     if (selectedHours.length > 0) {
         // 1) Hora de inicio
@@ -186,6 +219,156 @@ function Reservacion() {
         fetchJornadas();
     }, [cancha, selectedDate, token]);
 
+    //Calificar canchas
+    useEffect(() => {
+        if (!cancha) return;
+
+        const fetchRating = async () => {
+            try {
+                // Obtener promedio
+                const resPromedio = await fetch(
+                    `${API_URL}/calificaciones/promedio/${cancha}`,
+                    {
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    }
+                );
+                const prom = await resPromedio.text();
+                setRating(Number(prom));
+
+                // Obtener total de calificaciones
+                const resTotal = await fetch(
+                    `${API_URL}/calificaciones/total/${cancha}`,
+                    {
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    }
+                );
+                const total = await resTotal.text();
+                setTotalCalificaciones(Number(total));
+
+            } catch (error) {
+                console.error("Error obteniendo rating:", error);
+            }
+        };
+
+        fetchRating();
+    }, [cancha]);
+
+    //Const para calificar
+    const renderStars = (ratingValue, totalCalif) => {
+        const effectiveRating = ratingValue || 0; // Si es null, usa 0
+        const filledStars = Math.floor(effectiveRating);
+        const halfStar = effectiveRating % 1 >= 0.5;
+        const emptyStars = 5 - filledStars - (halfStar ? 1 : 0);
+
+        return (
+            <div className="flex items-center gap-2 mt-2">
+                <div className="text-3xl text-white flex">
+                    {Array(filledStars).fill("★")}
+                    {halfStar && "★"}
+                    {Array(emptyStars).fill("☆")}
+                </div>
+
+                <span className="text-white text-lg">
+                    {effectiveRating.toFixed(1)}
+                </span>
+
+                <span className="text-gray-300 text-sm">
+                    ({totalCalif} {totalCalif === 1 ? 'opinión' : 'opiniones'})
+                </span>
+            </div>
+        );
+    };
+
+    const renderRatingInput = () => {
+        return (
+            <div className="flex gap-2 mt-4">
+                {[1, 2, 3, 4, 5].map((value) => (
+                    <span
+                        key={value}
+                        onClick={() => setUserRating(value)}
+                        className="cursor-pointer text-4xl transition"
+                        style={{ color: value <= userRating ? "#FFF" : "#777" }}
+                    >
+                        ★
+                    </span>
+                ))}
+            </div>
+        );
+    };
+
+
+    const enviarCalificacion = async () => {
+        if (!cancha) {
+            alert("Debe seleccionar una cancha.");
+            return;
+        }
+
+        if (!user?.id) {
+            alert("Error: no se encontró el usuario.");
+            return;
+        }
+
+        const payload = {
+            idUsuario: user.id,
+            idCancha: cancha,
+            puntaje: userRating
+        };
+
+        console.log("Payload enviado:", payload);
+
+        try {
+            const res = await fetch(`${API_URL}/calificaciones`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) throw new Error("Error al enviar calificación");
+
+            alert("Calificación enviada con éxito");
+
+            // Refrescar promedio
+            const resProm = await fetch(
+                `${API_URL}/calificaciones/promedio/${cancha}`,
+                {
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                }
+            );
+            const prom = await resProm.text();
+            setRating(Number(prom));
+
+            // Refrescar total
+            const resTotal = await fetch(
+                `${API_URL}/calificaciones/total/${cancha}`,
+                {
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                }
+            );
+            const total = await resTotal.text();
+            setTotalCalificaciones(Number(total));
+
+        } catch (e) {
+            console.error("Error enviando calificación", e);
+            alert("Ya has calificado esta cancha");
+        }
+    };
+
+
+
+
+
+    //Fin de calificacion de cancha
 
 
     const handleSeleccionCancha = (id) => {
@@ -333,16 +516,42 @@ function Reservacion() {
                                 onChange={handleSeleccionCancha}
                             />
                         </div>
-                        <div className="m-6 flex items-center justify-center">
-                            {canchaSeleccionada?.imagen && (
-                                <img
-                                    src={canchaSeleccionada.imagen}
-                                    alt={`Foto de cancha ${canchaSeleccionada.label}`}
-                                    className="w-full h-full object-cover rounded-lg shadow-lg"
-                                />
+                        <div className="m-6 flex flex-col items-center justify-center">
+
+                            {/* Mostrar SOLO si hay cancha seleccionada */}
+                            {canchaSeleccionada && canchaSeleccionada.value && (
+                                <>
+                                    <div className="w-full">
+                                        {/* Promedio */}
+                                        <div className="text-yellow-400 text-2xl mb-2">
+                                            {renderStars(rating, totalCalificaciones)}
+                                        </div>
+                                    </div>
+                                    {canchaSeleccionada.imagen && (
+                                        <img
+                                            src={canchaSeleccionada.imagen}
+                                            alt={`Foto de cancha ${canchaSeleccionada.label}`}
+                                            className="w-full h-full object-cover rounded-lg shadow-lg mb-4"
+                                        />
+                                    )}
+
+                                    <div className="w-full">
+
+                                        {/* Calificación del usuario */}
+                                        <h3 className="text-white text-xl mt-1">Calificar esta cancha</h3>
+
+                                        {renderRatingInput()}
+
+                                        <button
+                                            onClick={enviarCalificacion}
+                                            className="mt-1 bg-white-300 text-white px-4 py-2 rounded-lg hover:bg-blue-300 hover:text-black transition"
+                                        >
+                                            Enviar calificación
+                                        </button>
+                                    </div>
+                                </>
                             )}
                         </div>
-
                     </div>
 
 
@@ -447,19 +656,19 @@ function Reservacion() {
 
                             <div className="grid grid-cols-2">
                                 <div>
-                                <p><strong>Zona:</strong> {zonaLabel}</p>
-                                <p><strong>Lugar:</strong> {lugarLabel}</p>
-                                <p><strong>Cancha:</strong> {canchaSeleccionada.label}</p>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <p><strong>Fecha:</strong> {selectedDate.toLocaleDateString()}</p>
-                                    <p><strong>Entrada:</strong> {`${String(hInicio).padStart(2, '0')}:00`}</p>
-                                    <p><strong>Salida:</strong> {horaSalida}</p>
+                                    <p><strong>Zona:</strong> {zonaLabel}</p>
+                                    <p><strong>Lugar:</strong> {lugarLabel}</p>
+                                    <p><strong>Cancha:</strong> {canchaSeleccionada.label}</p>
                                 </div>
-                               
-                            </div>
+
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <p><strong>Fecha:</strong> {selectedDate.toLocaleDateString()}</p>
+                                        <p><strong>Entrada:</strong> {`${String(hInicio).padStart(2, '0')}:00`}</p>
+                                        <p><strong>Salida:</strong> {horaSalida}</p>
+                                    </div>
+
+                                </div>
                             </div>
                             <div>
                                 <p className="text-lg">

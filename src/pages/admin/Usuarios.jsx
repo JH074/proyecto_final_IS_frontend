@@ -1,20 +1,30 @@
+// src/pages/admin/Usuarios.jsx
 import { useState, useEffect } from "react";
 import CardUsuario from "../../components/CardUsuarios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
+
 const API_URL = import.meta.env.VITE_API_URL;  
 
 function Usuarios() {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, role } = useAuth();   // ← ahora también traemos el rol
 
   const [usuarios, setUsuarios] = useState([]);
   const [pagina, setPagina] = useState(1);
   const porPagina = 4;
 
   useEffect(() => {
+    if (role && role !== "ADMIN") {
+      navigate("/");   
+    }
+  }, [role, navigate]);
+
+  useEffect(() => {
     const fetchUsuarios = async () => {
       try {
+        if (!token || role !== "ADMIN") return;
+
         const response = await fetch(`${API_URL}/usuarios`, {
           headers: {
             "Content-Type": "application/json",
@@ -27,17 +37,16 @@ function Usuarios() {
         }
 
         const data = await response.json();
+        const soloClientes = data.filter((usuario) => usuario.rol === "CLIENTE");
 
-        const soloClientes = data.filter(usuario => usuario.rol === "CLIENTE");
-
-        setUsuarios(soloClientes)
+        setUsuarios(soloClientes);
       } catch (error) {
         console.error("Error:", error);
       }
     };
 
     fetchUsuarios();
-  }, [token]);
+  }, [token, role]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -48,11 +57,13 @@ function Usuarios() {
   const usuariosPaginados = usuarios.slice(inicio, inicio + porPagina);
 
   const handleVerReservas = (usuarioId) => {
-    navigate(`/usuario/${usuarioId}/reservas`);
+    navigate(`/usuarios/${usuarioId}/reservas`);
   };
 
   const handleEliminar = async (usuarioId) => {
-    const confirmar = window.confirm("¿Estás seguro de que deseas eliminar este usuario?");
+    const confirmar = window.confirm(
+      "¿Estás seguro de que deseas eliminar este usuario?"
+    );
     if (!confirmar) return;
 
     try {

@@ -1,10 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthProvider';
-
-import navbar1 from '/src/assets/futbol-americano.png'
+import navbar1 from '/src/assets/futbol-americano.png';
 
 function NavBar() {
-
   const { token, role, user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -33,19 +31,32 @@ function NavBar() {
           <ul className="menu menu-horizontal px-1 text-white">
             <li><Link to="/">Inicio</Link></li>
 
+            {/* Menú CLIENTE */}
             {token && role === 'CLIENTE' && (
               <>
                 <li><Link to="/info_canchas">Canchas</Link></li>
                 <li><Link to="/reservar">Crear reservación</Link></li>
                 <li><Link to="/mis_reservaciones">Mis reservaciones</Link></li>
+                <li><Link to="/solicitudes">Solicitud propietario</Link></li>
+                
               </>
             )}
 
+            {/* Menú PROPIETARIO */}
+            {token && role === 'PROPIETARIO' && (
+              <>
+                <li><Link to="/propietario/reservaciones">Reservaciones</Link></li>
+                <li><Link to="/propietario/lugares">Lugares</Link></li>
+              </>
+            )}
+
+            {/* Menú ADMIN */}
             {token && role === 'ADMIN' && (
               <>
-                <li><Link to="/reservaciones">Reservaciones</Link></li>
-                <li><Link to="/usuarios">Usuarios</Link></li>
-                <li><Link to="/lugares">Lugares</Link></li>
+                <li><Link to="/admin/solicitudes">Solicitudes</Link></li>
+                <li><Link to="/admin/reservaciones">Reservaciones</Link></li>
+                <li><Link to="/admin/usuarios">Usuarios</Link></li>
+                <li><Link to="/admin/lugares">Lugares</Link></li>
               </>
             )}
           </ul>
